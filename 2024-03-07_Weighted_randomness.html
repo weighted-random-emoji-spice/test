@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.checked {
+  color: orange;
+}
+
+
+*{
+    margin: 0;
+    padding: 0;
+}
+.rate {
+    float: left;
+    height: 46px;
+    padding: 0 10px;
+}
+.rate:not(:checked) > input {
+    position:absolute;
+    top:-9999px;
+}
+.rate:not(:checked) > label {
+    float:right;
+    width:1em;
+    overflow:hidden;
+    white-space:nowrap;
+    cursor:pointer;
+    font-size:30px;
+    color:#ccc;
+}
+.rate:not(:checked) > label:before {
+    content: '★ ';
+}
+.rate > input:checked ~ label {
+    color: #ffc700;    
+}
+.rate:not(:checked) > label:hover,
+.rate:not(:checked) > label:hover ~ label {
+    color: #deb217;  
+}
+.rate > input:checked + label:hover,
+.rate > input:checked + label:hover ~ label,
+.rate > input:checked ~ label:hover,
+.rate > input:checked ~ label:hover ~ label,
+.rate > label:hover ~ input:checked ~ label {
+    color: #c59b08;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+.align_up_in_row{
+    vertical-align: top;
+}
+.unticked_row{
+    background-color: #AAA2A0;
+}
+
+.ticked_row{
+    background-color: #FFFFFF;
+}
+
+.state_selection .hidden_if_state_selection{
+    display: none;
+}
+
+.state_rate .hidden_if_state_rate{
+    display: none;
+}
+.state_rate .unticked_row{
+    display: none;
+}
+.big_button{
+    font-size: 3rem;
+}
+.medium_button{
+    font-size: 1.5rem;
+}
+
+.centered_text{
+        text-align: center;
+}
+
+/* Modified from: https://github.com/mukulkant/Star-rating-using-pure-css */
+</style>
+</head>
+<body id="body" class="state_selection">
+
+<table id="input-table-outer" >
+    <tr>
+        <th><h1>This is a random emoji generator !</h1></th>
+    </tr>
+    <tr>
+        <th><h1>Emoji Type</h1></th>
+    </tr>
+    <tr>
+        <th><h2>Solo</h2></th>
+        <th><h2>Duo</h2></th>
+    </tr>
+    <tr>
+        <td class="align_up_in_row">
+            <table id="input-table-activities-solo">
+                <tr>
+                  <th class="hidden_if_state_rate">Acceptable ?</th>
+                  <th>Name</th>
+                  <th class="hidden_if_state_selection">Rating out of 5</th>
+                </tr>
+            </table>
+        </td>
+        <td class="align_up_in_row">
+            <table id="input-table-activities-duo">
+                <tr>
+                  <th class="hidden_if_state_rate">Acceptable ?</th>
+                  <th>Name</th>
+                  <th class="hidden_if_state_selection">Rating out of 5</th>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <th><h1>Spices</h1></th>
+    </tr>
+    <tr>
+        <th><h2>Special Solo</h2></th>
+        <th><h2>Special Duo</h2></th>
+    </tr>
+    <tr>
+        <td class="align_up_in_row">
+            <table id="input-table-spices-solo">
+                <tr>
+                  <th class="hidden_if_state_rate">Acceptable ?</th>
+                  <th>Name</th>
+                  <th class="hidden_if_state_selection">Rating out of 5</th>
+                </tr>
+            </table>
+        </td>
+        <td class="align_up_in_row">
+            <table id="input-table-spices-duo">
+                <tr>
+                  <th class="hidden_if_state_rate">Acceptable ?</th>
+                  <th>Name</th>
+                  <th class="hidden_if_state_selection">Rating out of 5</th>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <th><h2>No restrictions</h2></th>
+    </tr>
+    <tr>
+        <td class="align_up_in_row">
+            <table id="input-table-spices-any">
+                <tr>
+                  <th class="hidden_if_state_rate">Acceptable ?</th>
+                  <th>Name</th>
+                  <th class="hidden_if_state_selection">Rating out of 5</th>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<h1>Generator</h1>
+<table>
+    <tr>
+      <th class="centered_text">
+      <h2>Selection</h2>
+      </th>
+    </tr>
+    <tr>
+      <td class="centered_text">
+      <button id="toggle-state-btn1" class="hidden_if_state_rate big_button">✔️</button>
+      <button id="toggle-state-btn2" class="hidden_if_state_selection big_button">❌</button>
+      </td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+      <th class="centered_text">
+      <h2>Randomize</h2>
+      </th>
+    </tr>
+    <tr>
+      <td class="centered_text">
+      <button id="create-table-btn" class="big_button">🎲</button></br>
+      </td>
+    </tr>
+</table>
+<table id="input-table-spices-solo">
+    <tr>
+      <th class="centered_text">Emojis: <button id="regen-activity-btn" class="medium_button">🔄</button></th>
+      <th class="centered_text">Spice <button id="regen-spice-btn" class="medium_button">🔄</button></th>
+    </tr>
+    <tr>
+      <td id="activity-result" class="centered_text"></td>
+      <td id="spice-result" class="centered_text"></td>
+    </tr>
+</table>
+
+<script>
+let id_input_tables_base="input-table";
+
+function generateRowHTML(row_id,row_real_name,number_stars=5){
+    let stars_html=`
+      <td  class="hidden_if_state_rate"><input type="checkbox" id="${row_id}-is-acceptable" name="${row_real_name}" value="{row_id}"></td>
+      <td>${row_real_name}</td>
+      <td class="hidden_if_state_selection">
+        <div class="rate">`;
+    let star_id_base=`${row_id}-star-`;
+    for (let star_index=number_stars; star_index > 0; star_index--) {
+        let star_id=`${star_id_base}-${star_index}`;
+        stars_html+=`
+            <input type="radio" id="${star_id}" name="${star_id_base}" value="${star_index}" />
+            <label for="${star_id}" title="${star_index}">${star_index} stars</label>`
+    }
+    stars_html+=`</div>
+      </td>`
+    return stars_html;
+}
+function generateRatingDict(){
+    let output_rating_dict={"activities":{},"spices":{}};
+    let ticked_rows=document.getElementsByClassName("ticked_row");
+    for (let row_html_el_index = 0; row_html_el_index < ticked_rows.length; row_html_el_index++) {
+        let row_html_el=ticked_rows[row_html_el_index];
+        let row_html_el_id=row_html_el.id;
+        let row_type=row_html_el.dataset.row_type;
+        let row_name=row_html_el.children[1].firstChild.textContent;
+        let row_rating_radio_name=row_html_el.children[2].children[0].children[0].name;
+        let row_rating_value_el=document.querySelector(`input[name="${row_rating_radio_name}"]:checked`);//will return null if nothing found = there's no rating
+        if (!!row_rating_value_el){
+            let row_rating_value=row_rating_value_el.value;
+            output_rating_dict[row_type][row_name]={
+                "id":row_html_el_id,
+                "name":row_name,
+                "type":row_type,
+                "rating":row_rating_value,
+            }
+        }
+        else{
+            //console.log(`${row_name} has no rating`)
+        }
+    }
+    //console.log(output_rating_dict);
+    return output_rating_dict;
+}
+function getWeightedRandomNumber(items, weights) {
+    let i;
+
+    for (i = 1; i < weights.length; i++)
+        weights[i] += weights[i - 1];
+    
+    let random = Math.random() * weights[weights.length - 1];
+    
+    for (i = 0; i < weights.length; i++)
+        if (weights[i] > random)
+            break;
+    
+    return items[i];
+}
+
+function generateResult(only_change_this_type=null){
+    let rating_dict=generateRatingDict();
+    let random_ready_dict={"activities":{"items":[],"weights":[]},"spices":{"items":[],"weights":[]}};
+    let random_result={"activities":"","spices":""};
+    for (let current_cat in rating_dict){
+        for (let rating_key in rating_dict[current_cat]){
+            let rating_obj=rating_dict[current_cat][rating_key]
+            random_ready_dict[current_cat]["items"].push(rating_obj["name"])
+            random_ready_dict[current_cat]["weights"].push(parseInt(rating_obj["rating"])*weight_multiplier)
+        }
+        if(random_ready_dict[current_cat]["items"].length > 0){
+            random_result[current_cat]=getWeightedRandomNumber(random_ready_dict[current_cat]["items"],random_ready_dict[current_cat]["weights"])
+        }
+    }
+    //console.log(random_ready_dict)   
+    //console.log(random_result)
+    if (only_change_this_type == "activity"){
+        document.getElementById("activity-result").innerHTML=random_result["activities"];
+    }
+    else if (only_change_this_type == "spice"){
+        document.getElementById("spice-result").innerHTML=random_result["spices"];
+    }
+    else{
+        document.getElementById("activity-result").innerHTML=random_result["activities"];
+        document.getElementById("spice-result").innerHTML=random_result["spices"];
+    }    
+}
+
+//lists of elements
+let list_activities_solo=["16🙋‍♂️🟫🙋🥨","17🙋‍🟫🙋‍♂🍆️","18🙋👋🍆","19🙋👄🍆","20🙋‍♂️👈🥨","21🙋‍♂️👅🥨","22🙋👈🥨💦 ⛔🙋‍♂","23🙋‍♂️👋🍆💦 ⛔🙋"];
+let list_activities_duo=["24🍆🥨","25 2x🙋/🙋‍♂","26🙋‍♂️🍆🙋🍑","27🙋‍♂️👅🥨 & 🙋👄🍆","28🙋‍♂️👈🥨 & 🙋👋🍆","29🙋👈🥨 & 🙋‍♂️👋🍆"];
+
+let list_spice_solo=["30❤️👈🥨/👋🍆","31❤️⛔🍆🥨","32❤️⛔🍆🥨/👈🥨/👋🍆"];
+let list_spice_duo=[];
+let list_spice_any=["10️⃣","2🙋‍♂️👈🙋🍑","3🙋👈🙋‍♂️🍑","4🙋‍♂️👈🙋🍑 & 🙋👈🙋‍♂️🍑","5🙋⤴️⤵️⤴️⤵️","6🙋‍♂️⤴️⤵️⤴️⤵️",
+    "7️⤴️⤵️⤴️⤵️🙋&🙋‍♂️","8🙋‍♂️⚜️🙋(🔗)","9🙋‍♂️🔗🙋","10🙋⚜️🙋‍♂️","11🗨️🔥","12🤗💘💕","13🧘⁉️","14🚪🚶🤐👅🥨","15⛔⏲️⤴️⤵️⤴️⤵️","33🎭","34🍫"];
+
+let dict_of_table_creation_list_activities={"solo":list_activities_solo,"duo":list_activities_duo};
+let dict_of_table_creation_list_spices={"solo":list_spice_solo,"duo":list_spice_duo,"any":list_spice_any};
+
+let dict_of_dict_of_list_table_creation={"activities":dict_of_table_creation_list_activities,"spices":dict_of_table_creation_list_spices}
+
+
+//param
+let number_stars=5;
+let weight_multiplier=2;
+
+
+//construct the tables
+for (let type_of_table in dict_of_dict_of_list_table_creation)
+{
+    let dict_of_lists = dict_of_dict_of_list_table_creation[type_of_table];
+    for (let list_name in dict_of_lists)
+    {
+        let table_id=`${id_input_tables_base}-${type_of_table}-${list_name}`;
+        console.log(table_id)
+        let table_el=document.getElementById(table_id);
+        let current_list=dict_of_lists[list_name];
+        for (let i = 0; i < current_list.length; i++) {
+            let row_real_name=current_list[i];
+            let row_name_base=`${id_input_tables_base}-${type_of_table}-${list_name}`;
+            let row_nb=table_el.rows.length;
+            let new_row=table_el.insertRow(-1);
+            let row_id=`${row_name_base}-row-${row_nb}`
+            new_row.id=row_id;
+            new_row.classList.add("unticked_row");   
+            new_row.dataset.row_type=`${type_of_table}`;
+            new_row.innerHTML=generateRowHTML(row_id,row_real_name,number_stars);
+            //add callback
+            document.getElementById(`${row_id}-is-acceptable`).addEventListener('change', (event) => {
+              let checkbox=event.currentTarget;
+              checkbox.parentElement.parentElement.classList.toggle("unticked_row");
+              checkbox.parentElement.parentElement.classList.toggle("ticked_row");
+            })
+        }
+    }
+}
+
+//callback button Toggle state
+
+document.getElementById("toggle-state-btn1").addEventListener('click', (event) => {
+                let outer_table=document.getElementById("body");
+                outer_table.classList.toggle("state_selection");
+                outer_table.classList.toggle("state_rate");
+            })
+document.getElementById("toggle-state-btn2").addEventListener('click', (event) => {
+                let outer_table=document.getElementById("body");
+                outer_table.classList.toggle("state_selection");
+                outer_table.classList.toggle("state_rate");
+            })
+
+
+//callback create output table
+document.getElementById("create-table-btn").addEventListener('click', (event) => {
+                generateResult(null)
+});
+document.getElementById("regen-activity-btn").addEventListener('click', (event) => {
+                generateResult("activity")
+});
+document.getElementById("regen-spice-btn").addEventListener('click', (event) => {
+                generateResult("spice")
+});
+
+
+</script>
+
+</body>
+</html>
